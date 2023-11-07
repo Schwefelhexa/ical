@@ -6,8 +6,14 @@ export type CalendarEventProps = {
   from: Date;
   to: Date;
   title: string;
+  location?: string;
 };
-export default function CalendarEvent({ from, to, title }: CalendarEventProps) {
+export default function CalendarEvent({
+  from,
+  to,
+  title,
+  location,
+}: CalendarEventProps) {
   const context = useContext(calendarContext);
   if (!context) throw new Error("CalendarEvent must be used within a Calendar");
 
@@ -34,7 +40,6 @@ export default function CalendarEvent({ from, to, title }: CalendarEventProps) {
       }
     >
       <div className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-pink-50 p-2 text-xs leading-5 hover:bg-pink-100">
-        <p className="order-1 font-semibold text-pink-700">{title}</p>
         <p className="text-pink-500 group-hover:text-pink-700">
           <time dateTime={from.toISOString()}>
             {from.toLocaleString(undefined, {
@@ -43,6 +48,8 @@ export default function CalendarEvent({ from, to, title }: CalendarEventProps) {
             })}
           </time>
         </p>
+        <p className="font-semibold text-pink-700">{title}</p>
+        {location && <p className="text-pink-600">{location}</p>}
       </div>
     </li>
   );
