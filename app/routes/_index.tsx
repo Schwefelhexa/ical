@@ -4,6 +4,7 @@ import { weekOfYear } from "~/utils/date";
 import type { CalendarProps } from "~/components/Calendar";
 import Calendar from "~/components/Calendar";
 import CalendarEvent from "~/components/CalendarEvent";
+import FilterList from "~/components/FilterList";
 
 export const meta: MetaFunction = () => {
   return [
@@ -101,23 +102,26 @@ export default function Example() {
   };
 
   return (
-    <div className="flex h-full">
-      <div style={{ flexGrow: 2 }} className="w-full">
-        <Calendar
-          year={year}
-          week={week}
-          onWeekChange={changeWeek}
-          hoursRange={[
-            Math.min(...meetings.map((m) => m.from.getHours())),
-            Math.max(...meetings.map((m) => m.to.getHours())),
-          ]}
-        >
-          {meetings.map((m, i) => (
-            <CalendarEvent key={i} title={m.title} from={m.from} to={m.to} />
-          ))}
-        </Calendar>
+    <div
+      className="grid h-full"
+      style={{ gridTemplateColumns: "2fr minmax(28rem, 1fr)" }}
+    >
+      <Calendar
+        year={year}
+        week={week}
+        onWeekChange={changeWeek}
+        hoursRange={[
+          Math.min(...meetings.map((m) => m.from.getHours())),
+          Math.max(...meetings.map((m) => m.to.getHours())),
+        ]}
+      >
+        {meetings.map((m, i) => (
+          <CalendarEvent key={i} title={m.title} from={m.from} to={m.to} />
+        ))}
+      </Calendar>
+      <div className="border-l border-gray-300 px-4 pt-2">
+        <FilterList />
       </div>
-      <div className="w-[1000px] flex-grow bg-red-200" />
     </div>
   );
 }
