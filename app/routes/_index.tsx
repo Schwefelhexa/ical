@@ -74,14 +74,14 @@ const meetings = [
     to: new Date(2023, 10, 11, 16),
   },
   {
-    title: "Art History Seminar",
-    from: new Date(2023, 10, 12, 11),
-    to: new Date(2023, 10, 12, 12),
+    title: "Morning Meditation",
+    from: new Date(2023, 10, 12, 7),
+    to: new Date(2023, 10, 12, 8),
   },
   {
-    title: "Computer Science Workshop",
-    from: new Date(2023, 10, 12, 15),
-    to: new Date(2023, 10, 12, 17),
+    title: "Evening Reading",
+    from: new Date(2023, 10, 12, 18),
+    to: new Date(2023, 10, 12, 19),
   },
 ];
 
@@ -101,18 +101,23 @@ export default function Example() {
   };
 
   return (
-    <Calendar
-      year={year}
-      week={week}
-      onWeekChange={changeWeek}
-      hoursRange={[
-        Math.min(...meetings.map((m) => m.from.getHours())),
-        Math.max(...meetings.map((m) => m.to.getHours())),
-      ]}
-    >
-      {meetings.map((m, i) => (
-        <CalendarEvent key={i} title={m.title} from={m.from} to={m.to} />
-      ))}
-    </Calendar>
+    <div className="flex h-full">
+      <div style={{ flexGrow: 2 }} className="w-full">
+        <Calendar
+          year={year}
+          week={week}
+          onWeekChange={changeWeek}
+          hoursRange={[
+            Math.min(...meetings.map((m) => m.from.getHours())),
+            Math.max(...meetings.map((m) => m.to.getHours())),
+          ]}
+        >
+          {meetings.map((m, i) => (
+            <CalendarEvent key={i} title={m.title} from={m.from} to={m.to} />
+          ))}
+        </Calendar>
+      </div>
+      <div className="w-[1000px] flex-grow bg-red-200" />
+    </div>
   );
 }
