@@ -101,7 +101,15 @@ export default function Example() {
   };
 
   return (
-    <Calendar year={year} week={week} onWeekChange={changeWeek}>
+    <Calendar
+      year={year}
+      week={week}
+      onWeekChange={changeWeek}
+      hoursRange={[
+        Math.min(...meetings.map((m) => m.from.getHours())),
+        Math.max(...meetings.map((m) => m.to.getHours())),
+      ]}
+    >
       {meetings.map((m, i) => (
         <CalendarEvent key={i} title={m.title} from={m.from} to={m.to} />
       ))}

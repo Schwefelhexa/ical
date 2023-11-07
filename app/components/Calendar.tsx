@@ -9,13 +9,10 @@ import { Menu, Transition } from "@headlessui/react";
 import { classNames } from "~/utils/classNames";
 import { DAY_IN_MS, dateFromWeek, isToday } from "~/utils/date";
 
-const times = [...new Array(24)].map(
-  (_, i) => i.toString().padStart(2, "0") + ":00",
-);
-
 export type CalendarProps = PropsWithChildren<{
   year: number;
   week: number;
+  hoursRange?: [number, number];
   onWeekChange?: (week: number | "current") => void;
 }>;
 
@@ -24,13 +21,17 @@ export type CalendarContext = {
   week: number;
   slots_per_hour: number;
   slot_offset: number;
+  range: [number, number];
 };
 export const calendarContext = createContext<CalendarContext | null>(null);
+
+const SLOTS_PER_HOUR = 12;
 
 export default function Calendar({
   year,
   week,
   children,
+  hoursRange = [0, 24],
   onWeekChange,
 }: CalendarProps) {
   const startDate = dateFromWeek(week, year);
@@ -38,11 +39,19 @@ export default function Calendar({
     (_, i) => new Date(startDate.getTime() + i * DAY_IN_MS),
   );
 
+  let range: [number, number];
+  range = [Math.min(...hoursRange), Math.max(...hoursRange)];
+  const times = [...new Array(range[1] - range[0])].map(
+    (_, i) => (i + range[0]).toString().padStart(2, "0") + ":00",
+  );
+  const hours = range[1] - range[0];
+
   const context: CalendarContext = {
     year,
     week,
-    slots_per_hour: 12,
+    slots_per_hour: SLOTS_PER_HOUR,
     slot_offset: 2,
+    range,
   };
 
   return (
@@ -119,7 +128,7 @@ export default function Calendar({
       <div className="isolate flex flex-auto flex-col overflow-auto bg-white">
         <div
           style={{ width: "165%" }}
-          className="flex max-w-full flex-none flex-col sm:max-w-none md:max-w-full"
+          className="flex h-full max-w-full flex-none flex-col sm:max-w-none md:max-w-full"
         >
           <div className="sticky top-0 z-30 flex-none bg-white shadow ring-1 ring-black ring-opacity-5 sm:pr-8">
             <div className="grid grid-cols-7 text-sm leading-6 text-gray-500 sm:hidden">
@@ -181,7 +190,9 @@ export default function Calendar({
               {/* Horizontal lines */}
               <div
                 className="col-start-1 col-end-2 row-start-1 grid divide-y divide-gray-100"
-                style={{ gridTemplateRows: "repeat(48, minmax(3.5rem, 1fr))" }}
+                style={{
+                  gridTemplateRows: `repeat(${2 * hours}, minmax(3.5rem, 1fr))`,
+                }}
               >
                 <div className="row-end-1 h-7" />
                 {times.map((t) => (
@@ -198,7 +209,7 @@ export default function Calendar({
 
               {/* Vertical lines */}
               <div className="col-start-1 col-end-2 row-start-1 hidden grid-cols-7 grid-rows-1 divide-x divide-gray-100 sm:grid sm:grid-cols-7">
-                {[...new Array(weekDays.length - 1)].map((i) => (
+                {[...new Array(weekDays.length)].map((i) => (
                   <div
                     key={i}
                     className="row-span-full"
@@ -211,7 +222,9 @@ export default function Calendar({
               <ol
                 className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 sm:grid-cols-7 sm:pr-8"
                 style={{
-                  gridTemplateRows: "1.75rem repeat(288, minmax(0, 1fr)) auto",
+                  gridTemplateRows: `1.75rem repeat(${
+                    SLOTS_PER_HOUR * hours
+                  }, minmax(0, 1fr)) auto`,
                 }}
               >
                 <calendarContext.Provider value={context}>

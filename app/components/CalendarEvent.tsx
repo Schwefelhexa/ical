@@ -25,7 +25,9 @@ export default function CalendarEvent({ from, to, title }: CalendarEventProps) {
       style={
         {
           gridRow: `${
-            context.slot_offset + startHour * context.slots_per_hour
+            context.slot_offset +
+            startHour * context.slots_per_hour -
+            context.range[0] * context.slots_per_hour
           } / span ${duration * context.slots_per_hour}`,
           "--col": dayIndex + 1,
         } as React.CSSProperties
