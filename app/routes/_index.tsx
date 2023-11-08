@@ -1,5 +1,11 @@
-import { json, type MetaFunction } from "@remix-run/node";
-import { useLoaderData, useSearchParams } from "@remix-run/react";
+import {
+  type ActionFunctionArgs,
+  json,
+  type MetaFunction,
+  redirect,
+} from "@remix-run/node";
+import { Form, useLoaderData, useSearchParams } from "@remix-run/react";
+import { not, inArray } from "drizzle-orm";
 import { weekOfYear } from "~/utils/date";
 import type { CalendarProps } from "~/components/Calendar";
 import Calendar from "~/components/Calendar";
@@ -8,6 +14,8 @@ import FilterList from "~/components/FilterList";
 import db from "~/db";
 import { filters } from "~/db/schema";
 import { useState } from "react";
+import Button from "~/components/Button";
+import { FilterData } from "~/components/Filter";
 
 export const meta: MetaFunction = () => {
   return [
@@ -107,6 +115,26 @@ const meetings = [
   },
 ];
 
+export const action = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData();
+  const newFilters: FilterData[] = JSON.parse(formData.get("filters"));
+
+  const ids = newFilters.map((f) => f.id);
+  // Apply deletion of filters
+  await db.delete(filters).where(not(inArray(filters.id, ids)));
+  // Upsert new filters
+  for (const filter of newFilters) {
+    await db.insert(filters).values(filter).onConflictDoUpdate({
+      target: filters.id,
+      set: filter,
+    });
+  }
+
+	const url = new URL(request.url);
+	url.searchParams.set("success", "true");
+  return redirect(url.toString());
+};
+
 export default function IndexPage() {
   const { filters: filtersInitial } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -150,6 +178,12 @@ export default function IndexPage() {
       </Calendar>
       <div className="border-l border-gray-300 px-4 pt-2">
         <FilterList filters={filters} onFiltersChange={setFilters} />
+        <Form method="post">
+          <input type="hidden" name="filters" value={JSON.stringify(filters)} />
+          <Button type="submit" className="mt-8 w-full" size="lg">
+            Save changes
+          </Button>
+        </Form>
       </div>
     </div>
   );

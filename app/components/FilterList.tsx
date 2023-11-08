@@ -16,7 +16,7 @@ export default function FilterList({
   };
 
   return (
-    <ul className="flex h-full flex-col gap-y-4">
+    <ul className="flex flex-col gap-y-4">
       {filters.map((filter) => (
         <Filter
           key={filter.id}
