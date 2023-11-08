@@ -3,10 +3,11 @@ import {
   json,
   type MetaFunction,
   redirect,
+  type LoaderFunctionArgs,
 } from "@remix-run/node";
 import { Form, useLoaderData, useSearchParams } from "@remix-run/react";
 import { not, inArray } from "drizzle-orm";
-import { weekOfYear } from "~/utils/date";
+import { dateFromWeek, weekOfYear } from "~/utils/date";
 import type { CalendarProps } from "~/components/Calendar";
 import Calendar from "~/components/Calendar";
 import CalendarEvent from "~/components/CalendarEvent";
@@ -17,8 +18,8 @@ import { useEffect, useState } from "react";
 import Button from "~/components/Button";
 import type { FilterData } from "~/components/Filter";
 import Input from "~/components/Input";
-import { calendarEvents } from "~/ical/mockevents";
 import { multipleFilterEvent, unjsonCalendarEvent } from "~/ical/filter";
+import { fetchEvents } from "~/ical/fetcher";
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,11 +28,29 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async () => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const searchParams = new URL(request.url).searchParams;
+  const year = parseInt(
+    searchParams.get("year") || new Date().getFullYear().toString(),
+  );
+  const week = parseInt(
+    searchParams.get("week") || weekOfYear(new Date()).toString(),
+  );
+	const startTime = dateFromWeek(week, year)
+	const endTime = dateFromWeek(week + 1, year)
+
+  const calendar = db.select().from(calendars).limit(1).all()[0];
+  const allFilters = db.select().from(filters).all();
+
+  const eventsAll = await fetchEvents(calendar);
+	const eventsInView = eventsAll.filter((e) => e.start >= startTime && e.start < endTime)
+
   return json({
-    filters: db.select().from(filters).all(),
-    calendar: db.select().from(calendars).limit(1).all()[0],
-    events: calendarEvents,
+    filters: allFilters,
+    calendar,
+    events: eventsInView,
+    year,
+    week,
   });
 };
 
@@ -65,14 +84,10 @@ export default function IndexPage() {
     filters: filtersInitial,
     calendar,
     events: eventsJsonified,
+    year,
+    week,
   } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const year = parseInt(
-    searchParams.get("year") || new Date().getFullYear().toString(),
-  );
-  const week = parseInt(
-    searchParams.get("week") || weekOfYear(new Date()).toString(),
-  );
   const [filters, setFilters] = useState(filtersInitial);
   const success = searchParams.get("success") === "true";
 
@@ -82,8 +97,10 @@ export default function IndexPage() {
     setSearchParams(searchParams);
   };
 
-	const events = eventsJsonified.map(e => unjsonCalendarEvent(e));
-  const eventsFiltered = events.filter((e) => multipleFilterEvent(filters, e));
+  const events = eventsJsonified.map((e) => unjsonCalendarEvent(e));
+  const eventsFiltered = events.filter((e) =>
+    multipleFilterEvent(filters, e),
+  );
 
   // Clear success message after 2 seconds
   useEffect(() => {

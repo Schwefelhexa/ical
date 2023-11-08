@@ -18,3 +18,5 @@ export const calendars = sqliteTable("calendars", {
   name: text("name").notNull(),
   sourceUrl: text("source_url").notNull(),
 });
+export type Calendar = typeof calendars.$inferSelect;
+export type CalendarInsert = typeof calendars.$inferInsert;
