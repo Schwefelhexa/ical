@@ -17,9 +17,9 @@ export default function Button({ className, color = "primary", size = "md", ...p
 				size === "lg" && "px-3 py-2",
 				size === "xl" && "px-4 py-2",
         color === "primary" &&
-          "bg-indigo-600 hover:bg-indigo-500 focus-visible:outline-indigo-600",
+          "bg-indigo-600 hover:bg-indigo-500 focus-visible:outline-indigo-600 disabled:bg-indigo-400",
         color === "destructive" &&
-          "bg-red-600 hover:bg-red-500 focus-visible:outline-red-600",
+          "bg-red-600 hover:bg-red-500 focus-visible:outline-red-600 disabled:bg-red-400",
       )}
     />
   );

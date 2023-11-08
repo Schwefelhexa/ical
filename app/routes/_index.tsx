@@ -1,4 +1,4 @@
-import { json, type LoaderFunction, type MetaFunction } from "@remix-run/node";
+import { json, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { weekOfYear } from "~/utils/date";
 import type { CalendarProps } from "~/components/Calendar";
@@ -7,6 +7,7 @@ import CalendarEvent from "~/components/CalendarEvent";
 import FilterList from "~/components/FilterList";
 import db from "~/db";
 import { filters } from "~/db/schema";
+import { useState } from "react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -107,7 +108,7 @@ const meetings = [
 ];
 
 export default function IndexPage() {
-  const { filters } = useLoaderData<typeof loader>();
+  const { filters: filtersInitial } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const year = parseInt(
     searchParams.get("year") || new Date().getFullYear().toString(),
@@ -115,6 +116,7 @@ export default function IndexPage() {
   const week = parseInt(
     searchParams.get("week") || weekOfYear(new Date()).toString(),
   );
+  const [filters, setFilters] = useState(filtersInitial);
 
   const changeWeek: CalendarProps["onWeekChange"] = (week) => {
     let value = week === "current" ? "" : week.toString();
@@ -147,7 +149,7 @@ export default function IndexPage() {
         ))}
       </Calendar>
       <div className="border-l border-gray-300 px-4 pt-2">
-        <FilterList filters={filters} onFilterChange={() => {}} />
+        <FilterList filters={filters} onFiltersChange={setFilters} />
       </div>
     </div>
   );
