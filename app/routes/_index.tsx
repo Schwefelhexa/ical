@@ -106,7 +106,7 @@ const meetings = [
   },
 ];
 
-export default function Example() {
+export default function IndexPage() {
   const { filters } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const year = parseInt(
