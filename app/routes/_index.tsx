@@ -123,7 +123,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const ids = newFilters.map((f) => f.id);
   // Apply deletion of filters
-  await db.delete(filters).where(not(inArray(filters.id, ids)));
+  if (ids.length > 0)
+    await db.delete(filters).where(not(inArray(filters.id, ids)));
+  else await db.delete(filters);
   // Upsert new filters
   for (const filter of newFilters) {
     await db.insert(filters).values(filter).onConflictDoUpdate({
