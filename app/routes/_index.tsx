@@ -13,7 +13,7 @@ import CalendarEvent from "~/components/CalendarEvent";
 import FilterList from "~/components/FilterList";
 import db from "~/db";
 import { filters } from "~/db/schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "~/components/Button";
 import { FilterData } from "~/components/Filter";
 
@@ -130,8 +130,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
   }
 
-	const url = new URL(request.url);
-	url.searchParams.set("success", "true");
+  const url = new URL(request.url);
+  url.searchParams.set("success", "true");
   return redirect(url.toString());
 };
 
@@ -145,12 +145,23 @@ export default function IndexPage() {
     searchParams.get("week") || weekOfYear(new Date()).toString(),
   );
   const [filters, setFilters] = useState(filtersInitial);
+  const success = searchParams.get("success") === "true";
 
   const changeWeek: CalendarProps["onWeekChange"] = (week) => {
     let value = week === "current" ? "" : week.toString();
     searchParams.set("week", value);
     setSearchParams(searchParams);
   };
+
+  // Clear success message after 2 seconds
+  useEffect(() => {
+    if (!success) return;
+    const timeout = setTimeout(() => {
+      searchParams.delete("success");
+      setSearchParams(searchParams);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [success, searchParams, setSearchParams]);
 
   return (
     <div
@@ -181,7 +192,7 @@ export default function IndexPage() {
         <Form method="post">
           <input type="hidden" name="filters" value={JSON.stringify(filters)} />
           <Button type="submit" className="mt-8 w-full" size="lg">
-            Save changes
+            {success ? "Saved!" : "Save changes"}
           </Button>
         </Form>
       </div>
