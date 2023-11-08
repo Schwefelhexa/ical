@@ -17,6 +17,8 @@ import { useEffect, useState } from "react";
 import Button from "~/components/Button";
 import type { FilterData } from "~/components/Filter";
 import Input from "~/components/Input";
+import { calendarEvents } from "~/ical/mockevents";
+import { multipleFilterEvent, unjsonCalendarEvent } from "~/ical/filter";
 
 export const meta: MetaFunction = () => {
   return [
@@ -29,93 +31,9 @@ export const loader = async () => {
   return json({
     filters: db.select().from(filters).all(),
     calendar: db.select().from(calendars).limit(1).all()[0],
+    events: calendarEvents,
   });
 };
-
-const meetings = [
-  {
-    title: "Mathematics Lecture",
-    location: "Math Building, Room 101",
-    from: new Date(2023, 10, 6, 9),
-    to: new Date(2023, 10, 6, 10),
-  },
-  {
-    title: "Study Group with Friends",
-    location: "Library, Study Room 3",
-    from: new Date(2023, 10, 6, 14),
-    to: new Date(2023, 10, 6, 16),
-  },
-  {
-    title: "Physics Lab",
-    location: "Science Building, Lab 204",
-    from: new Date(2023, 10, 7, 11),
-    to: new Date(2023, 10, 7, 13),
-  },
-  {
-    title: "Student Club Meeting",
-    location: "Student Center, Meeting Room",
-    from: new Date(2023, 10, 7, 15),
-    to: new Date(2023, 10, 7, 17),
-  },
-  {
-    title: "English Literature Seminar",
-    location: "Humanities Building, Room 301",
-    from: new Date(2023, 10, 8, 13),
-    to: new Date(2023, 10, 8, 14),
-  },
-  {
-    title: "Career Counseling Session",
-    location: "Student Services Center, Office 2A",
-    from: new Date(2023, 10, 8, 16),
-    to: new Date(2023, 10, 8, 17),
-  },
-  {
-    title: "Chemistry Lecture",
-    location: "Science Building, Lecture Hall",
-    from: new Date(2023, 10, 9, 10),
-    to: new Date(2023, 10, 9, 11),
-  },
-  {
-    title: "Student Senate Meeting",
-    location: "Student Center, Meeting Room",
-    from: new Date(2023, 10, 9, 14),
-    to: new Date(2023, 10, 9, 15),
-  },
-  {
-    title: "Biology Lab",
-    location: "Science Building, Lab 302",
-    from: new Date(2023, 10, 10, 12),
-    to: new Date(2023, 10, 10, 14),
-  },
-  {
-    title: "Study Group with Classmates",
-    location: "Library, Study Room 5",
-    from: new Date(2023, 10, 10, 15),
-    to: new Date(2023, 10, 10, 17),
-  },
-  {
-    title: "Psychology Lecture",
-    location: "Psychology Building, Room 210",
-    from: new Date(2023, 10, 11, 9),
-    to: new Date(2023, 10, 11, 10),
-  },
-  {
-    title: "Tutoring Session",
-    location: "Tutoring Center, Room 7B",
-    from: new Date(2023, 10, 11, 14),
-    to: new Date(2023, 10, 11, 16),
-  },
-  {
-    title: "Private Morning Meditation",
-    from: new Date(2023, 10, 12, 7),
-    to: new Date(2023, 10, 12, 8),
-  },
-  {
-    title: "Private Evening Reading",
-    from: new Date(2023, 10, 12, 18),
-    to: new Date(2023, 10, 12, 19),
-  },
-];
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -143,7 +61,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function IndexPage() {
-  const { filters: filtersInitial, calendar } = useLoaderData<typeof loader>();
+  const {
+    filters: filtersInitial,
+    calendar,
+    events: eventsJsonified,
+  } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const year = parseInt(
     searchParams.get("year") || new Date().getFullYear().toString(),
@@ -159,6 +81,9 @@ export default function IndexPage() {
     searchParams.set("week", value);
     setSearchParams(searchParams);
   };
+
+	const events = eventsJsonified.map(e => unjsonCalendarEvent(e));
+  const eventsFiltered = events.filter((e) => multipleFilterEvent(filters, e));
 
   // Clear success message after 2 seconds
   useEffect(() => {
@@ -180,23 +105,29 @@ export default function IndexPage() {
         week={week}
         onWeekChange={changeWeek}
         hoursRange={[
-          Math.min(...meetings.map((m) => m.from.getHours())),
-          Math.max(...meetings.map((m) => m.to.getHours())),
+          Math.min(...events.map((m) => m.start.getHours())),
+          Math.max(...events.map((m) => m.end.getHours())),
         ]}
       >
-        {meetings.map((m, i) => (
+        {events.map((m, i) => (
           <CalendarEvent
             key={i}
-            title={m.title}
-            from={m.from}
-            to={m.to}
+            title={m.summary}
+            from={m.start}
+            to={m.end}
             location={m.location}
+            ghost={!eventsFiltered.includes(m)}
           />
         ))}
       </Calendar>
       <Form method="post">
         <div className="space-y-8 border-l border-gray-300 px-4 pt-4">
-          <Input name="source_url" label="Source URL" addonPre="https://" defaultValue={calendar.sourceUrl} />
+          <Input
+            name="source_url"
+            label="Source URL"
+            addonPre="https://"
+            defaultValue={calendar.sourceUrl}
+          />
 
           <FilterList filters={filters} onFiltersChange={setFilters} />
           <div>

@@ -6,8 +6,8 @@ import { useState } from "react";
 import { nanoid } from "nanoid";
 
 const options = [
-  ["Name", "SUBJECT"],
-  ["Location", "LOCATION"],
+  ["Name", "summary"],
+  ["Location", "location"],
 ];
 
 export type FilterData = {

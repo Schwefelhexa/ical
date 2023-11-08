@@ -1,18 +1,21 @@
 import { useContext } from "react";
 import { calendarContext } from "./Calendar";
 import { DAY_IN_MS, dateFromWeek } from "~/utils/date";
+import { classNames } from "~/utils/classNames";
 
 export type CalendarEventProps = {
   from: Date;
   to: Date;
   title: string;
   location?: string;
+  ghost?: boolean;
 };
 export default function CalendarEvent({
   from,
   to,
   title,
   location,
+  ghost = false,
 }: CalendarEventProps) {
   const context = useContext(calendarContext);
   if (!context) throw new Error("CalendarEvent must be used within a Calendar");
@@ -39,7 +42,13 @@ export default function CalendarEvent({
         } as React.CSSProperties
       }
     >
-      <div className="group absolute inset-1 flex flex-col overflow-y-auto rounded-lg bg-pink-50 p-2 text-xs leading-5 hover:bg-pink-100">
+      <div
+        className={classNames(
+          "group absolute inset-1 flex flex-col overflow-y-auto rounded-lg p-2 text-xs leading-5 ",
+          !ghost && "bg-pink-50 hover:bg-pink-100",
+          ghost && "border border-dashed border-pink-200 bg-white hover:bg-gray-100 hover:border-dashed-600",
+        )}
+      >
         <p className="text-pink-500 group-hover:text-pink-700">
           <time dateTime={from.toISOString()}>
             {from.toLocaleString(undefined, {
