@@ -12,10 +12,11 @@ import Calendar from "~/components/Calendar";
 import CalendarEvent from "~/components/CalendarEvent";
 import FilterList from "~/components/FilterList";
 import db from "~/db";
-import { filters } from "~/db/schema";
+import { calendars, filters } from "~/db/schema";
 import { useEffect, useState } from "react";
 import Button from "~/components/Button";
-import { FilterData } from "~/components/Filter";
+import type { FilterData } from "~/components/Filter";
+import Input from "~/components/Input";
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,6 +28,7 @@ export const meta: MetaFunction = () => {
 export const loader = async () => {
   return json({
     filters: db.select().from(filters).all(),
+    calendar: db.select().from(calendars).limit(1).all()[0],
   });
 };
 
@@ -130,13 +132,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     });
   }
 
+  const sourceUrl = formData.get("source_url")?.toString();
+  await db.update(calendars).set({ sourceUrl });
+
   const url = new URL(request.url);
   url.searchParams.set("success", "true");
   return redirect(url.toString());
 };
 
 export default function IndexPage() {
-  const { filters: filtersInitial } = useLoaderData<typeof loader>();
+  const { filters: filtersInitial, calendar } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const year = parseInt(
     searchParams.get("year") || new Date().getFullYear().toString(),
@@ -187,15 +192,23 @@ export default function IndexPage() {
           />
         ))}
       </Calendar>
-      <div className="border-l border-gray-300 px-4 pt-2">
-        <FilterList filters={filters} onFiltersChange={setFilters} />
-        <Form method="post">
-          <input type="hidden" name="filters" value={JSON.stringify(filters)} />
-          <Button type="submit" className="mt-8 w-full" size="lg">
-            {success ? "Saved!" : "Save changes"}
-          </Button>
-        </Form>
-      </div>
+      <Form method="post">
+        <div className="space-y-8 border-l border-gray-300 px-4 pt-4">
+          <Input name="source_url" label="Source URL" addonPre="https://" defaultValue={calendar.sourceUrl} />
+
+          <FilterList filters={filters} onFiltersChange={setFilters} />
+          <div>
+            <input
+              type="hidden"
+              name="filters"
+              value={JSON.stringify(filters)}
+            />
+            <Button type="submit" className="w-full" size="lg">
+              {success ? "Saved!" : "Save changes"}
+            </Button>
+          </div>
+        </div>
+      </Form>
     </div>
   );
 }

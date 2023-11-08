@@ -51,7 +51,7 @@ export function FilterCreate({ onCreate }: FilterCreateProps) {
   const [filterValue, setFilterValue] = useState("");
 
   const data: FilterData = {
-		id: nanoid(12),
+    id: nanoid(12),
     filterBy,
     filterValue,
   };
@@ -116,6 +116,8 @@ function FilterCore({
       </div>
       <Input
         name="filter"
+        label="Filter"
+        labelSrOnly
         placeholder="Filter"
         className="h-full flex-grow"
         value={filterValue}
