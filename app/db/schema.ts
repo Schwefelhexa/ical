@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { text, sqliteTable } from "drizzle-orm/sqlite-core";
 import { nanoid } from "nanoid";
 
@@ -7,9 +8,17 @@ export const filters = sqliteTable("filters", {
     .$default(() => nanoid(12)),
   filterBy: text("filter_by").notNull(),
   filterValue: text("filter_value").notNull(),
+  calendarId: text("calendar_id").notNull(),
 });
 export type Filter = typeof filters.$inferSelect;
 export type FilterInsert = typeof filters.$inferInsert;
+
+export const filtersRelations = relations(filters, ({one}) => ({
+	calendar: one(calendars, {
+		fields: [filters.calendarId],
+		references: [calendars.id]
+	})
+}))
 
 export const calendars = sqliteTable("calendars", {
   id: text("id")
@@ -20,3 +29,7 @@ export const calendars = sqliteTable("calendars", {
 });
 export type Calendar = typeof calendars.$inferSelect;
 export type CalendarInsert = typeof calendars.$inferInsert;
+
+export const calendarsRelations = relations(calendars, ({ many }) => ({
+  filters: many(filters),
+}));

@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1699432708140,
-      "tag": "0000_giant_baron_zemo",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1699453294457,
-      "tag": "0001_new_gertrude_yorkes",
+      "when": 1699484437503,
+      "tag": "0000_white_spot",
       "breakpoints": true
     }
   ]
