@@ -1,16 +1,24 @@
-import type { MetaFunction } from "@remix-run/node";
-import { useSearchParams } from "@remix-run/react";
+import { json, type LoaderFunction, type MetaFunction } from "@remix-run/node";
+import { useLoaderData, useSearchParams } from "@remix-run/react";
 import { weekOfYear } from "~/utils/date";
 import type { CalendarProps } from "~/components/Calendar";
 import Calendar from "~/components/Calendar";
 import CalendarEvent from "~/components/CalendarEvent";
 import FilterList from "~/components/FilterList";
+import db from "~/db";
+import { filters } from "~/db/schema";
 
 export const meta: MetaFunction = () => {
   return [
     { title: "Calendar View" },
     { name: "description", content: "Edit & preview filter changes" },
   ];
+};
+
+export const loader = async () => {
+  return json({
+    filters: db.select().from(filters).all(),
+  });
 };
 
 const meetings = [
@@ -99,6 +107,7 @@ const meetings = [
 ];
 
 export default function Example() {
+  const { filters } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const year = parseInt(
     searchParams.get("year") || new Date().getFullYear().toString(),
@@ -138,7 +147,7 @@ export default function Example() {
         ))}
       </Calendar>
       <div className="border-l border-gray-300 px-4 pt-2">
-        <FilterList />
+        <FilterList filters={filters} onFilterChange={() => {}} />
       </div>
     </div>
   );

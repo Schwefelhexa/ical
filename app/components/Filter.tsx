@@ -9,7 +9,7 @@ const options = [
 ];
 
 export type FilterData = {
-  filter: string;
+  filterValue: string;
   filterBy: string;
 };
 export type FilterProps = {
@@ -40,8 +40,8 @@ export default function Filter({ data, onDataChange, onDelete }: FilterProps) {
         name="filter"
         placeholder="Filter"
         className="h-full flex-grow"
-        value={data.filter}
-        onChange={(e) => onDataChange({ ...data, filter: e.target.value })}
+        value={data.filterValue}
+        onChange={(e) => onDataChange({ ...data, filterValue: e.target.value })}
       />
       <Button
         className="h-full"
