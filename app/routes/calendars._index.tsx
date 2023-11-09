@@ -35,9 +35,6 @@ export async function loader() {
     iconUrl: `/api/favicon?url=${encodeURI("https://" + c.sourceUrl)}`,
   }));
 
-  const c = calendars[0];
-  console.log(new URL("https://" + c.sourceUrl).hostname);
-
   return json({ calendars });
 }
 
