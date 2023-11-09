@@ -1,3 +1,4 @@
+import { animated } from "react-spring";
 import { classNames } from "~/utils/classNames";
 
 export type ButtonProps = React.ComponentPropsWithoutRef<"button"> & {
@@ -7,7 +8,7 @@ export type ButtonProps = React.ComponentPropsWithoutRef<"button"> & {
 export default function Button({
   className,
   color = "primary",
-  size = "md",
+  size = "lg",
   ...props
 }: ButtonProps) {
   return (
@@ -26,8 +27,9 @@ export default function Button({
         color === "destructive" &&
           "bg-red-600 text-white hover:bg-red-500 focus-visible:outline-red-600 disabled:bg-red-400",
         color === "secondary" &&
-          "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:text-gray-400 disabled:bg-gray-100",
+          "text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400",
       )}
     />
   );
 }
+export const AnimatedButton = animated(Button);
