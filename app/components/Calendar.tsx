@@ -41,6 +41,8 @@ export default function Calendar({
 
   let range: [number, number];
   range = [Math.min(...hoursRange), Math.max(...hoursRange)];
+	if (range[0] < 0) range[0] = 0;
+	if (range[1] > 24) range[1] = 24;
   const times = [...new Array(range[1] - range[0])].map(
     (_, i) => (i + range[0]).toString().padStart(2, "0") + ":00",
   );
