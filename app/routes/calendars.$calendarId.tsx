@@ -142,8 +142,8 @@ export default function CalendarPage() {
 					/>
 				))}
 			</Calendar>
-			<Form method="post">
-				<div className="space-y-8 border-l border-gray-300 px-4 pt-4">
+			<Form method="post" className="border-l border-gray-300 h-full">
+				<div className="space-y-8 px-4 pt-4">
 					<Input
 						name="source_url"
 						label="Source URL"
