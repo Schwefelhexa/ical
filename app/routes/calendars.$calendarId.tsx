@@ -5,7 +5,7 @@ import {
 	redirect,
 	type LoaderFunctionArgs,
 } from "@remix-run/node";
-import { Form, useLoaderData, useSearchParams } from "@remix-run/react";
+import { Form, Outlet, useLoaderData, useParams, useSearchParams } from "@remix-run/react";
 import { not, inArray, eq, and } from "drizzle-orm";
 import { dateFromWeek, weekOfYear } from "~/utils/date";
 import type { CalendarProps } from "~/components/Calendar";
@@ -92,6 +92,7 @@ export default function CalendarPage() {
 		year,
 		week,
 	} = useLoaderData<typeof loader>();
+	const { eventId: selectedEventId } = useParams();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [filters, setFilters] = useState(filtersInitial);
 	const success = searchParams.get("success") === "true";
@@ -134,23 +135,20 @@ export default function CalendarPage() {
 				{events.map((m, i) => (
 					<CalendarEvent
 						key={i}
-						title={m.summary}
-						from={m.start}
-						to={m.end}
-						location={m.location}
+						event={m}
+						isSelected={m.uid === selectedEventId}
 						ghost={!eventsFiltered.includes(m)}
 					/>
 				))}
 			</Calendar>
-			<Form method="post" className="border-l border-gray-300 h-full">
-				<div className="space-y-8 px-4 pt-4">
+			<Form method="post" className="border-l border-gray-300 h-full divide-y divide-gray-300">
+				<div className="space-y-8 px-4 py-4">
 					<Input
 						name="source_url"
 						label="Source URL"
 						addonPre="https://"
 						defaultValue={calendar.sourceUrl}
 					/>
-
 					<FilterList filters={filters} onFiltersChange={setFilters} />
 					<div>
 						<input
@@ -162,6 +160,9 @@ export default function CalendarPage() {
 							{success ? "Saved!" : "Save changes"}
 						</Button>
 					</div>
+				</div>
+				<div className="px-4 py-4">
+					<Outlet />
 				</div>
 			</Form>
 		</div>
