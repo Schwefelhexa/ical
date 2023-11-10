@@ -3,7 +3,7 @@ import { redirect, type LoaderFunctionArgs } from "@remix-run/node";
 const lookup = new Map<string, string>();
 
 async function findFaviconUrl(url: URL): Promise<string | null> {
-  const probeUrl = `${url.protocol}${url.hostname}/favicon.ico`;
+  const probeUrl = `${url.protocol}//${url.hostname}/favicon.ico`;
   if (lookup.has(probeUrl)) return lookup.get(probeUrl)!;
 
   console.log("Probing", probeUrl);
@@ -17,7 +17,7 @@ async function findFaviconUrl(url: URL): Promise<string | null> {
   if (hostnameParts.length < 3) return null;
   hostnameParts.shift();
   const newHostname = hostnameParts.join(".");
-  const result = await findFaviconUrl(new URL(`${url.protocol}${newHostname}`));
+  const result = await findFaviconUrl(new URL(`${url.protocol}//${newHostname}`));
   if (!result) return null;
 
   lookup.set(probeUrl, result);
