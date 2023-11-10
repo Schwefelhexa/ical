@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import type { CSSProperties, PropsWithChildren } from "react";
 import { Fragment, createContext } from "react";
 import {
   ChevronLeftIcon,
@@ -13,6 +13,7 @@ export type CalendarProps = PropsWithChildren<{
   year: number;
   week: number;
   hoursRange?: [number, number];
+  showWeekend?: boolean;
   onWeekChange?: (week: number | "current") => void;
 }>;
 
@@ -32,17 +33,18 @@ export default function Calendar({
   week,
   children,
   hoursRange = [0, 24],
+  showWeekend = false,
   onWeekChange,
 }: CalendarProps) {
   const startDate = dateFromWeek(week, year);
-  const weekDays = [...new Array(7)].map(
+  const weekDays = [...new Array(showWeekend ? 7 : 5)].map(
     (_, i) => new Date(startDate.getTime() + i * DAY_IN_MS),
   );
 
   let range: [number, number];
   range = [Math.min(...hoursRange), Math.max(...hoursRange)];
-	if (range[0] < 0) range[0] = 0;
-	if (range[1] > 24) range[1] = 24;
+  if (range[0] < 0) range[0] = 0;
+  if (range[1] > 24) range[1] = 24;
   const times = [...new Array(range[1] - range[0])].map(
     (_, i) => (i + range[0]).toString().padStart(2, "0") + ":00",
   );
@@ -54,6 +56,10 @@ export default function Calendar({
     slots_per_hour: SLOTS_PER_HOUR,
     slot_offset: 2,
     range,
+  };
+
+  const columnsStyle: CSSProperties = {
+    gridTemplateColumns: `repeat(${weekDays.length}, minmax(0, 1fr))`,
   };
 
   return (
@@ -133,7 +139,10 @@ export default function Calendar({
           className="flex h-full max-w-full flex-none flex-col sm:max-w-none md:max-w-full"
         >
           <div className="sticky top-0 z-30 flex-none bg-white shadow ring-1 ring-black ring-opacity-5 sm:pr-8">
-            <div className="grid grid-cols-7 text-sm leading-6 text-gray-500 sm:hidden">
+            <div
+              className="grid text-sm leading-6 text-gray-500 sm:hidden"
+              style={columnsStyle}
+            >
               {weekDays.map((d) => (
                 <button
                   key={d.getTime()}
@@ -158,7 +167,7 @@ export default function Calendar({
               ))}
             </div>
 
-            <div className="-mr-px hidden grid-cols-7 divide-x divide-gray-100 border-r border-gray-100 text-sm leading-6 text-gray-500 sm:grid">
+            <div className="-mr-px hidden divide-x divide-gray-100 border-r border-gray-100 text-sm leading-6 text-gray-500 sm:grid" style={columnsStyle}>
               <div className="col-end-1 w-14" />
               {weekDays.map((d) => (
                 <div
@@ -210,7 +219,7 @@ export default function Calendar({
               </div>
 
               {/* Vertical lines */}
-              <div className="col-start-1 col-end-2 row-start-1 hidden grid-cols-7 grid-rows-1 divide-x divide-gray-100 sm:grid sm:grid-cols-7">
+              <div className="col-start-1 col-end-2 row-start-1 hidden grid-rows-1 divide-x divide-gray-100 sm:grid" style={columnsStyle}>
                 {[...new Array(weekDays.length)].map((i) => (
                   <div
                     key={i}
@@ -222,8 +231,9 @@ export default function Calendar({
               </div>
 
               <ol
-                className="col-start-1 col-end-2 row-start-1 grid grid-cols-1 sm:grid-cols-7 sm:pr-8"
+                className="col-start-1 col-end-2 row-start-1 grid sm:pr-8"
                 style={{
+									...columnsStyle,
                   gridTemplateRows: `1.75rem repeat(${
                     SLOTS_PER_HOUR * hours
                   }, minmax(0, 1fr)) auto`,
