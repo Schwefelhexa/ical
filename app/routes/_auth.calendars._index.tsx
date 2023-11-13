@@ -42,7 +42,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	});
 	const calendarsWithIcon = calendarsBase.map((c) => ({
 		...c,
-		iconUrl: `/api/favicon?url=${encodeURI("https://" + c.sourceUrl)}`,
+		iconUrl: `/api/favicon?url=${encodeURI(c.sourceUrl)}`,
 	}));
 
 	return json({ calendars: calendarsWithIcon });
