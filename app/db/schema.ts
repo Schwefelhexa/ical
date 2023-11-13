@@ -9,7 +9,6 @@ export const filters = sqliteTable("filters", {
   filterBy: text("filter_by").notNull(),
   filterValue: text("filter_value").notNull(),
   calendarId: text("calendar_id").notNull(),
-	userId: text("user_id").notNull()
 });
 export type Filter = typeof filters.$inferSelect;
 export type FilterInsert = typeof filters.$inferInsert;
