@@ -27,6 +27,7 @@ import Input from "~/components/Input";
 import { multipleFilterEvent, unjsonCalendarEvent } from "~/ical/filter";
 import { fetchEvents } from "~/ical/fetcher";
 import useBoop from "~/hooks/useBoop";
+import { getUserId } from "~/auth.server";
 
 export const meta: MetaFunction = () => {
   return [
@@ -52,6 +53,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
     with: { filters: true },
   });
   if (!calendar) throw new Response("Calendar not found", { status: 404 });
+	if (calendar.userId !== await getUserId(request)) throw new Response("Unauthorized", { status: 401 })
 
   const eventsAll = await fetchEvents(calendar);
   const eventsInView = eventsAll.filter(
@@ -142,6 +144,8 @@ export default function CalendarPage() {
     return () => clearTimeout(timeout);
   }, [success, searchParams, setSearchParams]);
 
+	const [sourceUrl, setSourceUrl] = useState(calendar.sourceUrl);
+
   return (
     <div
       className="grid h-full"
@@ -181,8 +185,10 @@ export default function CalendarPage() {
           <Input
             name="source_url"
             label="Source URL"
-            addonPre="https://"
-            defaultValue={calendar.sourceUrl}
+						// Only render the addon if the source URL is not a full URL
+            addonPre={sourceUrl.startsWith("http://") || sourceUrl.startsWith("https://") ? undefined : "https://"}
+            value={sourceUrl}
+						onChange={(e) => setSourceUrl(e.target.value)}
           />
           <FilterList filters={filters} onFiltersChange={setFilters} />
           <div>
