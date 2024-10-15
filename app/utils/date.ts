@@ -10,7 +10,7 @@ export function weekOfYear(date: Date): number {
 	* Returns the monday of the provided calendar week. If no year is provided, the current year is used.
 	*/
 export function dateFromWeek(week: number, year: number = new Date().getFullYear()): Date {
-	const day = 2 + (week - 1) * 7;
+	const day = 1 + (week - 1) * 7;
 	return new Date(year, 0, day);
 }
 
