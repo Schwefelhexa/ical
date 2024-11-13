@@ -9,6 +9,8 @@ export async function fetchEvents(calendar: Calendar) {
 	}
 
   const response = await fetch(sourceUrl);
+  if (!response.ok) throw new Error(`Failed to fetch calendar: ${response.statusText}`);
+
   const text = await response.text();
   const data = await ical.async.parseICS(text);
 
